@@ -1,0 +1,26 @@
+{
+  "name": "Fastest Slither",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "Set the Fastest Slither server and enjoy smooth gaming",
+  "icons": {
+    "16": "icons/icon.png",
+    "48": "icons/icon.png",
+    "128": "icons/icon.png"
+  },
+  "default_locale": "en",
+  "permissions": [
+    "tabs",
+    "http://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://slither.io/*"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ]
+    }
+  ]
+}
