@@ -53,11 +53,30 @@ var setFastestServer = function () {
 }
 findFastestServer(window.sos);`
 
+function initializeParams() {
+  if (typeof(Storage) !== "undefined") {
+    var settings = localStorage.getItem("edttsg");
+    var quality = localStorage.getItem("qual");
+
+    if (settings != 1 || quality != 0) {
+      localStorage.setItem("edttsg", 1);
+      localStorage.setItem("qual", 0);
+      localStorage.setItem("snakercv", 40);
+
+      //TODO: This is bad. Use 'extensionious' way to reload page instead of location.reload call
+      window.location.reload();
+    }
+  } else {
+      console.log('Browser does not support localStorage');
+  }
+}
+
 chrome.extension.sendMessage({}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
   	if (document.readyState === "interactive") {
   		clearInterval(readyStateCheckInterval);
 
+      initializeParams();
   		// ----------------------------------------------------------
   		// This part of the script triggers when page is done loading
   		console.log("Hello. This message was sent fastest slither server extension");
