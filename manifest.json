@@ -9,18 +9,13 @@
     "128": "icons/icon.png"
   },
   "default_locale": "en",
-  "permissions": [
-    "tabs",
-    "http://*/*"
-  ],
+  "permissions": ["tabs", "http://slither.io/*"],
   "content_scripts": [
     {
-      "matches": [
-        "http://slither.io/*"
-      ],
-      "js": [
-        "src/inject/inject.js"
-      ]
+      "matches": ["http://slither.io/*"],
+      "js": ["inject.js"],
+      "all_frames": true
     }
-  ]
+  ],
+  "web_accessible_resources": ["fastest.js"]
 }

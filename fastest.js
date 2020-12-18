@@ -1,64 +1,47 @@
 /**
  * Ping a server and get latency
- * @param  {String} host host ip
- * @param  {Number} port host port
- * @param  {Function} pong callback method
- * @param  {Boolean} async flag
- * @return {Undefined} none
+ * @param  {Object} server: { ip: string, po: number}
+ * @return {Promise}
  */
-let ping = (host, port, pong, async) => {
-  let starTime = new Date().getTime();
-  let xhr = new XMLHttpRequest();
+const pingServer = async (server) => {
+  return new Promise((resolve, reject) => {
+    const starTime = performance.now();
+    let ws = new WebSocket("ws://" + server.ip + ":" + server.po);
 
-  xhr.open("GET", "http://" + host + ":" + port, async);
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState == 4) {
-      let endTime = new Date().getTime();
-      let latancy = endTime - starTime;
+    ws.onopen = () => {
+      const endTime = performance.now();
+      const latency = endTime - starTime;
+      resolve({ server, latency });
+      console.log(server, latency, starTime, endTime);
+      ws.close();
+      ws = null;
+    };
 
-      if (pong && typeof pong === 'function') {
-        pong(latancy);
-      }
-    }
-  };
-  try {
-    xhr.send(null);
-  } catch(exception) {
-    // this is expected
-  }
+    ws.onerror = (e) => {
+      ws = null;
+      reject(e);
+    };
+  });
 };
-
-let callback = (server, latancy) => {
-  server.ping = latancy;
-  pingList.push(server);
-
-  // first and fastest
-  if (pingList.length === 1) {
-    console.log('fastest', server.ip, server.ping);
-    setFastestServer();
-  }
-};
-
-let pingList = [];
 
 /**
  * Ping tests all servers and finds best one
  * @param  {Array} servers list of slither servers
- * @return {Object} fastest server
+ * @return {Promise} fastest server and latency
  */
-let findFastestServer = (servers) => {
-  servers.forEach(server => {
-    ping(server.ip, server.po, callback.bind(null, server), true);
-  });
+const findFastestServer = async (servers) => {
+  return await Promise.all(servers.map(pingServer));
 };
 
-let setFastestServer = () => {
-  if (sos && pingList && pingList[0]) {
-    sos = [pingList[0]];
-  } else {
-    console.error("Something went wrong while setting server");
-  }
-}
-
-//findFastestServer(sos);
-document.body.innerHTML = "wedsd";
+findFastestServer(window.sos)
+  .then(({ server, latency }) => {
+    console.info(
+      `Fastest server found: ${server.ip}/${server.po}`,
+      latency,
+      "ms"
+    );
+    window.sos = [server];
+  })
+  .catch((e) => {
+    console.warn("Could not set fastest server", e);
+  });
